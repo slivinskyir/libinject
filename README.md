@@ -1,6 +1,28 @@
 
 # C++ Function Injection
 
+## 0. The Problem
+
+You have production code that depends on other functions, and you want to unit-test it without calling their real implementations.
+For example, a function may download a file, access a database, or communicate with another service. These dependencies can make tests slow, unreliable, or difficult to reproduce.
+
+```cpp
+bool DownloadFile(const char* Path, char* Content)
+{
+    // Impl ... 
+}
+
+bool GetFile()
+{
+   if (DownloadFile("", 0))
+   {
+      // ...
+   {
+}
+```
+Function injection lets you replace a dependency with a simple lambda, so you can test your production logic in isolation without changing its behavior.
+
+
 ## 1. Why use it?
 
 Function injection makes it easy to test code that depends on external functions or other components without calling their real implementations.
