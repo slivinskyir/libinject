@@ -72,3 +72,70 @@ void Test_FileDownload_Error()
 ```
 
 This lets tests control function behavior without modifying production logic.
+
+
+## 6. Example overview
+
+Consider a function that downloads a file and a function that processes its result.
+
+**Production code:**
+
+```cpp
+inject__ bool DownloadFile(const char* Path, char* Content)
+{
+    std::cout << "MAIN\n";
+    return false;
+}
+
+file GetFile(const char* Path)
+{
+    file File = {};
+
+    bool Downloaded = DownloadFile(Path, File.Content);
+    if (Downloaded)
+    {
+        File.Exists = true;
+        File.SizeBytes = strlen(File.Content);
+    }
+
+    return File;
+}
+```
+
+**Test:**
+
+```cpp
+void Test_FileDownload_Error()
+{
+    INJECT_SET_LOCAL(
+        DownloadFile,
+        [](const char* Path, char* Content)
+        {
+            return false;
+        });
+
+    file File = GetFile("/test.txt");
+
+    assert(File.Exists == false);
+    assert(File.SizeBytes == 0);
+}
+```
+
+The test replaces `DownloadFile` with a lambda that simulates a failed download. `GetFile` executes its normal production logic, allowing the test to verify the error-handling behavior without performing a real download.
+
+## 7. Build and run
+
+Generate the default implementations for all functions marked with `inject__`:
+
+```bash
+python3 inject.py . -o injected_functions.cpp
+```
+
+Compile the test executable using Clang++:
+
+```bash
+clang++ -O0 -std=c++17 -DINJECT_AVAILABLE \
+    app.cpp \
+    injected_functions.cpp \
+    tests.cpp
+```
