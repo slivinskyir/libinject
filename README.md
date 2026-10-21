@@ -58,18 +58,16 @@ For functions inside a namespace, use `INJECT_DEFINE_NS`.
 Override a function locally using a lambda:
 
 ```cpp
-void Test_DownloadFile()
+void Test_FileDownload_Error()
 {
-    INJECT_SET_LOCAL(
-        DownloadFile,
-        [](const char* Path, char* Content)
-        {
-            std::strcpy(Content, "ABC");
-            return true;
-        });
+	INJECT_SET_LOCAL(DownloadFile, [](const char *Path, char *Content) 
+	{ 
+		return false; 
+	});
 
-    // Exercise code that calls DownloadFile().
-    // The override is restored when the scope ends.
+	file File = GetFile("/test.txt");
+	assert(File.Exists == false);
+	assert(File.SizeBytes == 0);
 }
 ```
 
